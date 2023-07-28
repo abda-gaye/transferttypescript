@@ -12,4 +12,7 @@ class Client extends Model
     {
         return $this->hasMany(Compte::class);
     }
+    protected $guarded = [
+        'id'
+    ];
 }

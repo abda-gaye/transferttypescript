@@ -16,9 +16,12 @@ class ClientFactory extends Factory
      */
     public function definition(): array
     {
+        $phonePrefixes = ['77', '76', '70', '78', '75'];
+        $phoneNumber = $this->faker->randomElement($phonePrefixes) . $this->faker->numerify('#######');
+
         return [
-            "fullname"=>$this->faker->name,
-            "phone"=>$this->faker->unique()->phoneNumber
+            "fullname" => $this->faker->name,
+            "phone" => $phoneNumber, // Utilisez la variable $phoneNumber ici
         ];
     }
 }
