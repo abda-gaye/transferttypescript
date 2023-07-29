@@ -1,4 +1,13 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 // Récupérez les éléments HTML
 const senderPhoneInput = document.getElementById('senderPhone');
 const senderFullnameInput = document.getElementById('senderFullname');
@@ -9,6 +18,31 @@ const receiverPhoneInput = document.getElementById('receiverPhone');
 const receiverFullnameInput = document.getElementById('receiverFullname');
 const submitButton = document.getElementById('submitBtn');
 const messageDiv = document.getElementById('messageDiv');
+function fetchFullname(phone) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const response = yield fetch(`http://127.0.0.1:8000/api/getFullName/${phone}`);
+            const data = yield response.json();
+            return data.fullname;
+        }
+        catch (error) {
+            console.error(error);
+            return '';
+        }
+    });
+}
+// Événement "input" pour le champ de numéro de téléphone de l'expéditeur
+senderPhoneInput.addEventListener('input', () => __awaiter(void 0, void 0, void 0, function* () {
+    const senderPhone = senderPhoneInput.value;
+    const fullname = yield fetchFullname(senderPhone);
+    senderFullnameInput.value = fullname;
+}));
+// Événement "input" pour le champ de numéro de téléphone du destinataire
+receiverPhoneInput.addEventListener('input', () => __awaiter(void 0, void 0, void 0, function* () {
+    const receiverPhone = receiverPhoneInput.value;
+    const fullname = yield fetchFullname(receiverPhone);
+    receiverFullnameInput.value = fullname;
+}));
 submitButton.addEventListener('click', () => {
     const senderPhone = senderPhoneInput.value;
     const senderFullname = senderFullnameInput.value;
@@ -24,7 +58,7 @@ submitButton.addEventListener('click', () => {
         setTimeout(() => {
             messageDiv.textContent = '';
             messageDiv.classList.add('hidden');
-        }, 1000);
+        }, 5000);
         return;
     }
     fetch('http://127.0.0.1:8000/api/transaction/transfert', {
@@ -52,7 +86,6 @@ submitButton.addEventListener('click', () => {
         }, 5000);
     })
         .catch((error) => {
-        // Gérez les erreurs ici
         console.error(error);
         messageDiv.textContent = 'Une erreur s\'est produite lors du dépôt.';
         messageDiv.classList.remove('hidden', 'bg-green-500');
