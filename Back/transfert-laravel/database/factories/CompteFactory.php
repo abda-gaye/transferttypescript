@@ -1,31 +1,31 @@
 <?php
-
 namespace Database\Factories;
 
 use App\Models\Client;
+use App\Models\Compte;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Compte>
- */
 class CompteFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         $phonePrefixes = ['77', '76', '70', '78', '75'];
-        $phoneNumber = $this->faker->randomElement($phonePrefixes) . $this->faker->numerify('#######');
+        $provider = $this->faker->randomElement(['OM', 'WV', 'WR', 'CB']);
+
+        // Récupérer un client existant ou en créer un nouveau s'il n'en existe pas
+        $client = Client::query()->inRandomOrder()->first();
+
+        $phoneNumber = $client->phone;
+
+        // Générer le numéro de compte en utilisant le fournisseur et le numéro de téléphone du client
+        $accountNumber = $provider . '_' . $phoneNumber;
 
         return [
-            'client_id' => Client::factory(),
-            'numero_compte' => $this->faker->unique()->regexify('[a-zA-Z]{2}_\d{9}'),
-            'phone_receiver' => $phoneNumber,
-            'account_type' => $this->faker->randomElement(['OM', 'WV', 'WR', 'CB']),
+            'client_id' => $client->id,
+            'numero_compte' => $accountNumber,
+            'account_type' => $provider,
             'solde' => $this->faker->randomFloat(2, 0, 1000000),
         ];
     }
 }
+

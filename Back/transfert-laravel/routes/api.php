@@ -19,4 +19,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::post("/transaction",[TransactionController::class,'depot']);
+Route::post("/transaction/depot",[TransactionController::class,'depot']);
+Route::post("/transaction/transfert",[TransactionController::class,'transfert']);
+Route::post("/transaction/retrait",[TransactionController::class,'retrait']);

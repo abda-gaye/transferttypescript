@@ -8,11 +8,14 @@ use Illuminate\Database\Eloquent\Model;
 class Client extends Model
 {
     use HasFactory;
-    public function comptes()
+    public function compte()
     {
         return $this->hasMany(Compte::class);
     }
     protected $guarded = [
         'id'
     ];
+
+
+    
 }

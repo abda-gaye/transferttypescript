@@ -15,7 +15,7 @@ return new class extends Migration
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
             $table->integer('montant');
-            $table->enum('transfert_type', ['OM', 'WV','WR', 'CB'])->nullable();
+            $table->enum('transfert_type', ['depot','retrait','transfert'])->nullable();
             $table->string("receiver_phone");
             $table->string("code");
             $table->dateTime("date");
