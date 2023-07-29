@@ -30,7 +30,6 @@ class TransactionController extends Controller
         }
 
         if ($provider === 'WR') {
-            // Effectuer le dépôt et générer un code de 15 chiffres pour le destinataire
             $receiverCode = mt_rand(100000000000000, 999999999999999);
 
             Transaction::create([
@@ -90,7 +89,6 @@ class TransactionController extends Controller
         $provider = $request->input('provider');
         $amount = $request->input('amount');
 
-        // Vérifiez si l'émetteur et le destinataire ont des comptes chez le même fournisseur
         $senderClient = Client::where('phone', $senderPhoneNumber)->first();
         $receiverClient = Client::where('phone', $receiverPhoneNumber)->first();
 
@@ -109,16 +107,13 @@ class TransactionController extends Controller
             return response()->json(['message' => 'Receiver account not found'], 404);
         }
 
-        // Vérifiez si le montant du transfert est inférieur au solde du compte de l'émetteur
         if ($amount > $senderAccount->solde) {
             return response()->json(['message' => 'Insufficient balance'], 400);
         }
 
-        // Effectuez le transfert en débitant le compte de l'émetteur et en créditant le compte du destinataire
         $senderAccount->solde -= $amount;
 
         if ($provider === 'WR') {
-            // Pour Wari, générer un code de 15 chiffres pour le destinataire
             $receiverCode = mt_rand(100000000000000, 999999999999999);
             Transaction::create([
                 'client_id' => $senderClient->id,
@@ -132,14 +127,13 @@ class TransactionController extends Controller
         } else {
             $receiverAccount->solde += $amount;
 
-            // Appliquer les frais de transfert en fonction du fournisseur
             switch ($provider) {
                 case 'OM':
                 case 'WV':
-                    $fees = 0.01; // 1% de frais pour OM et WV
+                    $fees = 0.01;
                     break;
                 case 'CB':
-                    $fees = 0.05; // 5% de frais pour CB
+                    $fees = 0.05;
                     break;
                 default:
                     $fees = 0;
@@ -149,14 +143,12 @@ class TransactionController extends Controller
             $receiverAccount->solde -= $feesAmount;
         }
 
-        // Sauvegardez les modifications dans la base de données
         $senderAccount->save();
 
         if ($provider !== 'WR') {
             $receiverAccount->save();
         }
 
-        // Enregistrez la transaction
         Transaction::create([
             'client_id' => $senderClient->id,
             'compte_id' => $senderAccount->id,
@@ -167,7 +159,6 @@ class TransactionController extends Controller
             'date' => now(),
         ]);
 
-        // Répondez avec un message de succès
         return response()->json(['message' => 'Transfert successful'], 200);
     }
 
@@ -183,13 +174,11 @@ class TransactionController extends Controller
         $receiverPhoneNumber = $request->input('receiver_phone');
         $code = $request->input('code');
 
-        // Vérifier si le destinataire existe
         $receiverClient = Client::where('phone', $receiverPhoneNumber)->first();
         if (!$receiverClient) {
             return response()->json(['message' => 'Receiver client not found'], 404);
         }
 
-        // Vérifier le code de retrait pour les transferts avec code (Wari et CB)
         $transaction = Transaction::where('receiver_phone', $receiverPhoneNumber)
             ->where('code', $code)
             ->where(function ($query) {
@@ -202,7 +191,6 @@ class TransactionController extends Controller
             return response()->json(['message' => 'Invalid code'], 400);
         }
 
-        // Vérifier si le retrait est toujours possible (dans les 24H pour les transferts immédiats)
         $retraitDate = Carbon::parse($transaction->date);
         $currentDate = Carbon::now();
         $diffInHours = $retraitDate->diffInHours($currentDate);
@@ -213,7 +201,6 @@ class TransactionController extends Controller
             }
         }
 
-        // Effectuer le retrait
         $receiverAccount = Compte::where('client_id', $receiverClient->id)
             ->where('account_type', $transaction->transfert_type)
             ->first();
@@ -225,7 +212,6 @@ class TransactionController extends Controller
         $receiverAccount->solde += $transaction->montant;
         $receiverAccount->save();
 
-        // Marquer la transaction comme étant traitée (retrait effectué)
         $transaction->update(['code' => null]);
 
         return response()->json(['message' => 'Withdrawal successful'], 200);

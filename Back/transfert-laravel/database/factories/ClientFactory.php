@@ -21,7 +21,7 @@ class ClientFactory extends Factory
 
         return [
             "fullname" => $this->faker->name,
-            "phone" => $phoneNumber, // Utilisez la variable $phoneNumber ici
+            "phone" => $phoneNumber, 
         ];
     }
 }

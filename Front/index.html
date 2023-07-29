@@ -1,11 +1,66 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Interface de transfert</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 </head>
-<body>
-    <h1>bonjour tout le monde</h1>
+<body class="bg-gray-100 flex justify-center items-center h-screen">
+
+    <div class="bg-blue-500 rounded-lg p-24 m-24">
+        <div id="messageDiv" class="text-center text-white mt-4 hidden"></div>
+        <div class="text-center">
+
+            <h1 class="text-4xl font-bold mb-6 text-white">breukh-transfert</h1>
+
+            <div class="mb-6">
+                <label class="block font-bold mb-2 text-white">
+                    <i class="fas fa-user mr-2"></i>
+                    Expéditeur
+                </label>
+                <input id="senderPhone" type="text" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300" placeholder="Ncompte/tel">
+                <input id="senderFullname" type="text" class="w-full mt-2 px-4 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300" placeholder="Fullname">
+            </div>
+
+            <div class="mb-6">
+                <label class="block font-bold mb-2 text-white">
+                    <i class="fas fa-exchange-alt mr-2"></i>
+                    Transaction
+                </label>
+                <input id="amount" type="text" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300" placeholder="Montant">
+                <div class="flex justify-center mt-2">
+                    <select id="provider" class="w-48 px-4 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300 mr-4">
+                        <option value="" disabled selected>fournisseur</option>
+                        <option value="OM">OM</option>
+                        <option value="WV">WV</option>
+                        <option value="WR">WR</option>
+                        <option value="CB">CB</option>
+                    </select>
+                    <select id="transactionType" class="w-48 px-4 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300">
+                        <option value="" disabled selected>transaction</option>
+                        <option value="depot">Dépôt</option>
+                        <option value="retrait">Retrait</option>
+                        <option value="transfert">Transfert</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <label class="block font-bold mb-2 text-white">
+                    <i class="fas fa-user-plus mr-2"></i>
+                    Destinataire
+                </label>
+                <input id="receiverPhone" type="text" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300" placeholder="Ncompte/tel">
+                <input id="receiverFullname" type="text" class="w-full mt-2 px-4 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300" placeholder="Fullname">
+            </div>
+
+            <button id="submitBtn" class="mt-6 px-4 py-2 bg-white text-blue-500 font-bold rounded-md hover:bg-blue-200">
+                <i class="fas fa-check-circle mr-2"></i>
+                Valider
+            </button>
+        </div>
+    </div>
+
+    <script type="module" src="main.js"></script>
 </body>
 </html>
