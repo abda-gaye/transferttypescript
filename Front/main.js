@@ -1,13 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 // Récupérez les éléments HTML
 const senderPhoneInput = document.getElementById('senderPhone');
 const senderFullnameInput = document.getElementById('senderFullname');
@@ -18,29 +9,27 @@ const receiverPhoneInput = document.getElementById('receiverPhone');
 const receiverFullnameInput = document.getElementById('receiverFullname');
 const submitButton = document.getElementById('submitBtn');
 const messageDiv = document.getElementById('messageDiv');
-function fetchFullname(phone) {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const response = yield fetch(`http://127.0.0.1:8000/api/getFullName/${phone}`);
-            const data = yield response.json();
-            return data.fullname;
-        }
-        catch (error) {
-            console.error(error);
-            return '';
-        }
-    });
+async function fetchFullname(phone) {
+    try {
+        const response = await fetch(`http://127.0.0.1:8000/api/getFullName/${phone}`);
+        const data = await response.json();
+        return data.fullname;
+    }
+    catch (error) {
+        console.error(error);
+        return '';
+    }
 }
-senderPhoneInput.addEventListener('input', () => __awaiter(void 0, void 0, void 0, function* () {
+senderPhoneInput.addEventListener('input', async () => {
     const senderPhone = senderPhoneInput.value;
-    const fullname = yield fetchFullname(senderPhone);
+    const fullname = await fetchFullname(senderPhone);
     senderFullnameInput.value = fullname;
-}));
-receiverPhoneInput.addEventListener('input', () => __awaiter(void 0, void 0, void 0, function* () {
+});
+receiverPhoneInput.addEventListener('input', async () => {
     const receiverPhone = receiverPhoneInput.value;
-    const fullname = yield fetchFullname(receiverPhone);
+    const fullname = await fetchFullname(receiverPhone);
     receiverFullnameInput.value = fullname;
-}));
+});
 submitButton.addEventListener('click', () => {
     const senderPhone = senderPhoneInput.value;
     const senderFullname = senderFullnameInput.value;
