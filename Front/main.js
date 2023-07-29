@@ -31,13 +31,11 @@ function fetchFullname(phone) {
         }
     });
 }
-// Événement "input" pour le champ de numéro de téléphone de l'expéditeur
 senderPhoneInput.addEventListener('input', () => __awaiter(void 0, void 0, void 0, function* () {
     const senderPhone = senderPhoneInput.value;
     const fullname = yield fetchFullname(senderPhone);
     senderFullnameInput.value = fullname;
 }));
-// Événement "input" pour le champ de numéro de téléphone du destinataire
 receiverPhoneInput.addEventListener('input', () => __awaiter(void 0, void 0, void 0, function* () {
     const receiverPhone = receiverPhoneInput.value;
     const fullname = yield fetchFullname(receiverPhone);

@@ -20,14 +20,12 @@ async function fetchFullname(phone: string): Promise<string> {
     }
 }
 
-// Événement "input" pour le champ de numéro de téléphone de l'expéditeur
 senderPhoneInput.addEventListener('input', async () => {
     const senderPhone = senderPhoneInput.value;
     const fullname = await fetchFullname(senderPhone);
     senderFullnameInput.value = fullname;
 });
 
-// Événement "input" pour le champ de numéro de téléphone du destinataire
 receiverPhoneInput.addEventListener('input', async () => {
     const receiverPhone = receiverPhoneInput.value;
     const fullname = await fetchFullname(receiverPhone);
