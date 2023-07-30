@@ -24,3 +24,5 @@ Route::post("/transaction/depot",[TransactionController::class,'depot']);
 Route::post("/transaction/transfert",[TransactionController::class,'transfert']);
 Route::post("/transaction/retrait",[TransactionController::class,'retrait']);
 Route::get('/getFullName/{phoneNumber}',[ClientController::class,'getFullNameByPhoneNumber']);
+Route::get('/transaction/history/{client_id}', [TransactionController::class, 'getClientTransactionHistory']);
+Route::get('/checkClientExistence/{phone}', [ClientController::class, 'checkClientExistence']);

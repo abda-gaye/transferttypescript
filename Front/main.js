@@ -1,14 +1,18 @@
 "use strict";
 // Récupérez les éléments HTML
-const senderPhoneInput = document.getElementById('senderPhone');
-const senderFullnameInput = document.getElementById('senderFullname');
-const amountInput = document.getElementById('amount');
-const providerSelect = document.getElementById('provider');
-const transactionTypeSelect = document.getElementById('transactionType');
-const receiverPhoneInput = document.getElementById('receiverPhone');
-const receiverFullnameInput = document.getElementById('receiverFullname');
-const submitButton = document.getElementById('submitBtn');
-const messageDiv = document.getElementById('messageDiv');
+const senderPhoneInput = document.querySelector('#senderPhone');
+const senderFullnameInput = document.querySelector('#senderFullname');
+const amountInput = document.querySelector('#amount');
+const providerSelect = document.querySelector('#provider');
+const transactionTypeSelect = document.querySelector('#transactionType');
+const receiverPhoneInput = document.querySelector('#receiverPhone');
+const receiverFullnameInput = document.querySelector('#receiverFullname');
+const submitButton = document.querySelector('#submitBtn');
+const messageDiv = document.querySelector('#messageDiv');
+const destinataireDiv = document.querySelector('#destinataireDiv');
+const transactionLabel = document.getElementById('transactionLabel');
+const viewHistoryBtn = document.getElementById('viewHistoryBtn');
+const transactionHistoryDiv = document.getElementById('transactionHistoryDiv');
 async function fetchFullname(phone) {
     try {
         const response = await fetch(`http://127.0.0.1:8000/api/getFullName/${phone}`);
@@ -20,16 +24,38 @@ async function fetchFullname(phone) {
         return '';
     }
 }
-senderPhoneInput.addEventListener('input', async () => {
+async function checkClientExistence(phone) {
+    try {
+        const response = await fetch(`http://127.0.0.1:8000/api/checkClientExistence/${phone}`);
+        const data = await response.json();
+        return data.exists;
+    }
+    catch (error) {
+        console.error(error);
+        return false;
+    }
+}
+async function updateSenderFullname() {
     const senderPhone = senderPhoneInput.value;
     const fullname = await fetchFullname(senderPhone);
     senderFullnameInput.value = fullname;
-});
-receiverPhoneInput.addEventListener('input', async () => {
+    const clientExists = await checkClientExistence(senderPhone);
+    viewHistoryBtn.style.display = clientExists ? 'inline-block' : 'none';
+}
+async function updateReceiverFullname() {
     const receiverPhone = receiverPhoneInput.value;
     const fullname = await fetchFullname(receiverPhone);
     receiverFullnameInput.value = fullname;
+}
+function showDestinataire(show) {
+    destinataireDiv.style.display = show ? 'block' : 'none';
+}
+transactionTypeSelect.addEventListener('change', () => {
+    const selectedTransaction = transactionTypeSelect.value;
+    showDestinataire(selectedTransaction !== 'retrait');
 });
+senderPhoneInput.addEventListener('input', updateSenderFullname);
+receiverPhoneInput.addEventListener('input', updateReceiverFullname);
 submitButton.addEventListener('click', () => {
     const senderPhone = senderPhoneInput.value;
     const senderFullname = senderFullnameInput.value;
@@ -64,7 +90,7 @@ submitButton.addEventListener('click', () => {
         .then((response) => response.json())
         .then((data) => {
         console.log(data);
-        messageDiv.textContent = 'Dépôt effectué avec succès !';
+        messageDiv.textContent = 'Transfert effectué avec succès !';
         messageDiv.classList.remove('hidden', 'bg-red-500');
         messageDiv.classList.add('bg-green-500');
         setTimeout(() => {
@@ -74,7 +100,7 @@ submitButton.addEventListener('click', () => {
     })
         .catch((error) => {
         console.error(error);
-        messageDiv.textContent = 'Une erreur s\'est produite lors du dépôt.';
+        messageDiv.textContent = 'Une erreur s\'est produite lors du transfert.';
         messageDiv.classList.remove('hidden', 'bg-green-500');
         messageDiv.classList.add('bg-red-500');
         setTimeout(() => {
@@ -83,3 +109,46 @@ submitButton.addEventListener('click', () => {
         }, 5000);
     });
 });
+// Au chargement initial, masquer la partie destinataire
+showDestinataire(false);
+// Ajoutez un écouteur d'événements pour le changement de la liste déroulante des fournisseurs
+providerSelect.addEventListener('change', () => {
+    const selectedProvider = providerSelect.value;
+    switch (selectedProvider) {
+        case 'OM':
+            transactionLabel.style.backgroundColor = 'orange';
+            break;
+        case 'WV':
+            transactionLabel.style.backgroundColor = 'blue';
+            break;
+        case 'WR':
+            transactionLabel.style.backgroundColor = '#93441A';
+            break;
+        case 'CB':
+            transactionLabel.style.backgroundColor = '#CA3C66';
+            break;
+        default:
+            transactionLabel.style.backgroundColor = 'transparent';
+            break;
+    }
+});
+// Afficher l'historique des transactions du client
+viewHistoryBtn.addEventListener('click', async () => {
+    const senderPhone = senderPhoneInput.value;
+    const historyResponse = await fetch(`http://localhost:8000/api/transaction/history/${senderPhone}`);
+    const historyData = await historyResponse.json();
+    if (historyData.length === 0) {
+        transactionHistoryDiv.textContent = 'Aucune transaction trouvée.';
+    }
+    else {
+        transactionHistoryDiv.textContent = ''; // Effacer le contenu précédent
+        const ul = document.createElement('ul');
+        historyData.forEach((transaction) => {
+            const li = document.createElement('li');
+            li.textContent = `Date: ${transaction.date}, Montant: ${transaction.montant}, Type: ${transaction.transfert_type}`;
+            ul.appendChild(li);
+        });
+        transactionHistoryDiv.appendChild(ul);
+    }
+});
+// ... (Le reste du code)

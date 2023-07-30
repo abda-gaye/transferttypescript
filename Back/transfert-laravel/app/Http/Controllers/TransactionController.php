@@ -217,6 +217,22 @@ class TransactionController extends Controller
         return response()->json(['message' => 'Withdrawal successful'], 200);
     }
 
+    public function getClientTransactionHistory($phone)
+{
+    $client = Client::where('phone', $phone)->first();
+
+    if (!$client) {
+        return response()->json(['error' => 'Client not found'], 404);
+    }
+
+    $transactions = Transaction::where('client_id', $client->id)->get();
+
+    // Retourner les transactions au format JSON
+    return response()->json($transactions);
+}
+
+
+
 
 
 }

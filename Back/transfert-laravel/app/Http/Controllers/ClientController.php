@@ -16,4 +16,15 @@ class ClientController extends Controller
             return response()->json(['message' => 'Utilisateur non trouvé'], 404);
         }
     }
+    public function checkClientExistence($phone)
+    {
+        $client = Client::where('phone', $phone)->first();
+
+        if ($client) {
+            return response()->json(['exists' => true], 200);
+        } else {
+            return response()->json(['exists' => false], 200);
+        }
+    }
+
 }
