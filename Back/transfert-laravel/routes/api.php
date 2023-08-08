@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\CompteController;
 use App\Http\Controllers\TransactionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -26,3 +27,8 @@ Route::post("/transaction/retrait",[TransactionController::class,'retrait']);
 Route::get('/getFullName/{phoneNumber}',[ClientController::class,'getFullNameByPhoneNumber']);
 Route::get('/transaction/history/{client_id}', [TransactionController::class, 'getClientTransactionHistory']);
 Route::get('/checkClientExistence/{phone}', [ClientController::class, 'checkClientExistence']);
+Route::get('/allclient', [ClientController::class, 'allclient']);
+Route::post('/addClient', [ClientController::class, 'addClient']);
+Route::get('/getCompteClientById/{id}',[CompteController::class,'getCompteClientById']);
+Route::post('/createCompte',[CompteController::class,'store']);
+Route::get('/getAllAccount', [CompteController::class, 'getAllAccount']);

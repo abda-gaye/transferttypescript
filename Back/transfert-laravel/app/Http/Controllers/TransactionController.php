@@ -13,61 +13,36 @@ class TransactionController extends Controller
 {
     public function depot(Request $request)
     {
-        $request->validate([
-            'phone' => 'required|string|exists:clients,phone',
-            'type_account' => 'required|string|in:OM,WV,WR,CB',
-            'amount' => 'required|numeric|min:500',
+        $validatedData = $request->validate([
+            'sender_phone' => 'required',
+            'receiver_phone' => 'required',
+            'provider' => 'required',
+            'amount' => 'required|numeric',
+            'transfert_type' => 'required|in:depot',
         ]);
 
-        $clientPhoneNumber = $request->input('phone');
-        $provider = $request->input('type_account');
-        $amount = $request->input('amount');
+        $senderClient = Client::where('phone', $validatedData['sender_phone'])->first();
 
-        $client = Client::where('phone', $clientPhoneNumber)->first();
-
-        if (!$client) {
-            return response()->json(['message' => 'Client not found'], 404);
+        if (!$senderClient) {
+            return response()->json(['message' => 'L\'expéditeur (client) n\'existe pas.'], 400);
         }
-
-        if ($provider === 'WR') {
-            $receiverCode = mt_rand(100000000000000, 999999999999999);
-
-            Transaction::create([
-                'client_id' => $client->id,
-                'montant' => $amount,
-                'transfert_type' => $request->input('transfert_type'),
-                'receiver_phone' => $clientPhoneNumber,
-                'code' => $receiverCode,
-                'date' => now(),
-            ]);
-
-            return response()->json(['message' => 'Deposit successful', 'receiver_code' => $receiverCode], 200);
+        $client = Client::where("phone", $validatedData['receiver_phone'])->first();
+        $receveur = Compte::where('client_id', $client->id)->first();
+        $receiver = Compte::where('numero_compte', $receveur->numero_compte)->first();
+        if (!$receiver) {
+            return response()->json(['message' => 'Le destinataire doit avoir un compte.'], 400);
         }
+        $transaction = new Transaction();
+        $transaction->client_id = $senderClient->id;
+        $transaction->montant = $validatedData['amount'];
+        $transaction->transfert_type = $validatedData['transfert_type'];
+        $transaction->receiver_phone = explode("_", $receveur->numero_compte)[1];
+        $transaction->date = now();
+        $transaction->save();
+        $receveur->solde += $validatedData['amount'];
+        $receveur->save();
 
-        $clientAccount = Compte::where('client_id', $client->id)->where('account_type', $provider)->first();
-
-        if (!$clientAccount) {
-            return response()->json(['message' => 'Client account not found'], 404);
-        }
-
-        if ($amount > $clientAccount->solde) {
-            return response()->json(['message' => 'Insufficient balance'], 400);
-        }
-
-        $clientAccount->solde -= $amount;
-        $clientAccount->save();
-
-        Transaction::create([
-            'client_id' => $client->id,
-            'compte_id' => $clientAccount->id,
-            'montant' => $amount,
-            'transfert_type' => $request->input('transfert_type'),
-            'receiver_phone' => $clientPhoneNumber,
-            'code' => '',
-            'date' => now(),
-        ]);
-
-        return response()->json(['message' => 'Deposit successful'], 200);
+        return response()->json(['message' => 'Dépôt effectué avec succès.']);
     }
 
 
@@ -113,7 +88,7 @@ class TransactionController extends Controller
 
         $senderAccount->solde -= $amount;
 
-        if ($provider === 'WR') {
+        if ($provider == 'WR') {
             $receiverCode = mt_rand(100000000000000, 999999999999999);
             Transaction::create([
                 'client_id' => $senderClient->id,
@@ -182,7 +157,7 @@ class TransactionController extends Controller
         $transaction = Transaction::where('receiver_phone', $receiverPhoneNumber)
             ->where('code', $code)
             ->where(function ($query) {
-                $query->where('transfert_type', 'Wari')
+                $query->where('transfert_type', 'WR')
                     ->orWhere('transfert_type', 'CB');
             })
             ->first();
@@ -195,9 +170,9 @@ class TransactionController extends Controller
         $currentDate = Carbon::now();
         $diffInHours = $retraitDate->diffInHours($currentDate);
 
-        if ($transaction->transfert_type === 'Wari' || $transaction->transfert_type === 'CB') {
+        if ($transaction->transfert_type === 'WR' || $transaction->transfert_type === 'CB') {
             if ($diffInHours > 24) {
-                return response()->json(['message' => 'Withdrawal period expired'], 400);
+                return response()->json(['message' => 'code expiré'], 400);
             }
         }
 
@@ -218,21 +193,17 @@ class TransactionController extends Controller
     }
 
     public function getClientTransactionHistory($phone)
-{
-    $client = Client::where('phone', $phone)->first();
+    {
+        $client = Client::where('phone', $phone)->first();
 
-    if (!$client) {
-        return response()->json(['error' => 'Client not found'], 404);
+        if (!$client) {
+            return response()->json(['error' => 'Client not found'], 404);
+        }
+
+        $transactions = Transaction::where('client_id', $client->id)->get();
+
+        return response()->json($transactions);
     }
 
-    $transactions = Transaction::where('client_id', $client->id)->get();
-
-    // Retourner les transactions au format JSON
-    return response()->json($transactions);
-}
-
-
-
-
-
+    
 }

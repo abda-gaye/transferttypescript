@@ -16,7 +16,9 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         Client::factory(10)->create()->each(function ($client) {
-            $client->compte()->saveMany(Compte::factory(1)->make());
+            $client->compte()->saveMany(Compte::factory(1
+
+            )->make());
         });
     }
 }
